@@ -4,11 +4,13 @@ const messageRouter = require("./src/router/messageRouter");
 const connectDB = require("./src/config/Db");
 const app = express();
 require("dotenv").config();
-
-app.use("api/auth", authRouter);
-app.use("api/messages", messageRouter);
-
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use("/api/auth", authRouter);
+app.use("/api/messages", messageRouter);
+
+
 
 connectDB()
     .then((res) => {
