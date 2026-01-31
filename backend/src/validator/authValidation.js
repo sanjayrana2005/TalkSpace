@@ -15,6 +15,18 @@ const signupValidation = (req) => {
     return true;
 }
 
+const loginValidation = (req) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        throw new Error("Email and password required");
+    }
+    if(!validate.isEmail(email)){
+        throw new Error("Wrong email format")
+    }
+    return true;
+}
+
 module.exports = {
-    signupValidation
+    signupValidation,
+    loginValidation
 }

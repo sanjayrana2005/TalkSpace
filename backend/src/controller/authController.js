@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt")
-const { signupValidation } = require("../validator/authValidation");
+const { signupValidation, loginValidation } = require("../validator/authValidation");
 const generateToken = require("../config/generateToken");
 require("dotenv").config();
 
@@ -26,7 +26,7 @@ const signupController = async (req, res) => {
             httpOnly: true,
             sameSite: "strict",
             secure: process.env.NODE_ENV === "development" ? false : true
-        })
+        });
 
         res.status(201).json({
             message: "Registered successfully",
@@ -44,7 +44,48 @@ const signupController = async (req, res) => {
     }
 }
 const loginController = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        loginValidation(req);
+        const isUser = await userModel.findOne({email}).select("+password");
 
+        if (!isUser) {
+            return res.status(400).json({
+                message: "Invalid credentials"
+            })
+        }
+        console.log("user",isUser)
+
+        const matchPassword = await bcrypt.compare(password, isUser.password);
+
+            if (!matchPassword) {
+            return res.status().json({
+                message: "Invalid credentials"
+            });
+        }
+
+        const token = generateToken(isUser._id);
+        res.cookie("talkSpace", token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "development" ? false : true
+        });
+
+        res.status(200).json({
+            message:"Login success",
+            user: {
+                _id: isUser._id,
+                fullName:isUser.fullName,
+                email: isUser.email,
+                profileImage: isUser.profileImage
+            }
+        })
+    } catch (error) {
+        res.json({
+            message: error.message
+        })
+    }
 }
 const logoutController = async (req, res) => {
 
