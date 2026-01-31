@@ -15,16 +15,21 @@ const transporter = nodemailer.createTransport({
 
 
 // Send an email using async/await
-const sendMail = async (userEamail, userName,subject ) => {
+const sendMail = async (userEamail, userName, subject) => {
 
-    const info = await transporter.sendMail({
-        from: `"TalkSpace" <${process.env.EMAIL_FROM}>`,
-        to: userEamail,
-        subject,
-        text: "Hello world?", // Plain-text version of the message
-        html: createWelcomeEmailTemplate(userName,"jjj"), // HTML version of the message
-    });
-    console.log("message sent",info)
+    try {
+        const info = await transporter.sendMail({
+            from: `"TalkSpace" <${process.env.EMAIL_FROM}>`,
+            to: userEamail,
+            subject, // Plain-text version of the message
+            html: createWelcomeEmailTemplate(userName, "jjj"), // HTML version of the message
+        });
+    } catch (error) {
+        if (err.code === 'EENVELOPE') {
+            console.log('Rejected recipients:', err.rejected);
+            console.log('Rejection details:', err.rejectedErrors);
+        }
+    }
 };
 
 module.exports = { sendMail }
