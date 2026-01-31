@@ -2,17 +2,21 @@ const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt")
 const { signupValidation, loginValidation } = require("../validator/authValidation");
 const generateToken = require("../config/generateToken");
+const { sendMail } = require("../utils/nodemailer");
 require("dotenv").config();
 
 const signupController = async (req, res) => {
-    const { fullName, email, password } = req.body;
+    let { fullName, email, password } = req.body;
     try {
         signupValidation(req);
+        
+        email = email.toLowerCase();
+
         const userExist = await userModel.findOne({ email });
         if (userExist) {
             return res.status(400).json({
                 message: "Email already exists"
-            })
+            });
         }
         const hashPassword = await bcrypt.hash(password, 10)
         const user = await userModel.create({
@@ -27,6 +31,8 @@ const signupController = async (req, res) => {
             sameSite: "strict",
             secure: process.env.NODE_ENV === "development" ? false : true
         });
+        const subject = "Welcome to TalkSpace 🎉"
+        sendMail(email,fullName,subject);
 
         res.status(201).json({
             message: "Registered successfully",
@@ -44,17 +50,17 @@ const signupController = async (req, res) => {
     }
 }
 const loginController = async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     try {
         loginValidation(req);
+        email=email.toLowerCase();
         const isUser = await userModel.findOne({email}).select("+password");
 
         if (!isUser) {
             return res.status(400).json({
-                message: "Invalid credentials"
+                message: "user not exist"
             })
         }
-        console.log("user",isUser)
 
         const matchPassword = await bcrypt.compare(password, isUser.password);
 
