@@ -102,8 +102,13 @@ const logoutController = async (req, res) => {
     });
 }
 
+const updateProfile =  async (req,res) => {
+
+}
+
 module.exports = {
     signupController,
     loginController,
-    logoutController
+    logoutController,
+    updateProfile,
 }
