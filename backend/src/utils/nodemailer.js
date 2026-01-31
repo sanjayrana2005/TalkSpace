@@ -22,7 +22,7 @@ const sendMail = async (userEamail, userName, subject) => {
             from: `"TalkSpace" <${process.env.EMAIL_FROM}>`,
             to: userEamail,
             subject, // Plain-text version of the message
-            html: createWelcomeEmailTemplate(userName, "jjj"), // HTML version of the message
+            html: createWelcomeEmailTemplate(userName, process.env.FRONTEND_URL), // HTML version of the message
         });
     } catch (error) {
         if (err.code === 'EENVELOPE') {
