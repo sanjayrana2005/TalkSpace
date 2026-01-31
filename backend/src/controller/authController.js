@@ -3,13 +3,15 @@ const bcrypt = require("bcrypt")
 const { signupValidation, loginValidation } = require("../validator/authValidation");
 const generateToken = require("../config/generateToken");
 const { sendMail } = require("../utils/nodemailer");
+const cloud = require("../utils/cloudinary");
 require("dotenv").config();
+const fs = require("fs")
 
 const signupController = async (req, res) => {
     let { fullName, email, password } = req.body;
     try {
         signupValidation(req);
-        
+
         email = email.toLowerCase();
 
         const userExist = await userModel.findOne({ email });
@@ -32,7 +34,7 @@ const signupController = async (req, res) => {
             secure: process.env.NODE_ENV === "development" ? false : true
         });
         const subject = "Welcome to TalkSpace 🎉"
-        sendMail(email,fullName,subject);
+        sendMail(email, fullName, subject);
 
         res.status(201).json({
             message: "Registered successfully",
@@ -53,8 +55,8 @@ const loginController = async (req, res) => {
     let { email, password } = req.body;
     try {
         loginValidation(req);
-        email=email.toLowerCase();
-        const isUser = await userModel.findOne({email}).select("+password");
+        email = email.toLowerCase();
+        const isUser = await userModel.findOne({ email }).select("+password");
 
         if (!isUser) {
             return res.status(400).json({
@@ -64,7 +66,7 @@ const loginController = async (req, res) => {
 
         const matchPassword = await bcrypt.compare(password, isUser.password);
 
-            if (!matchPassword) {
+        if (!matchPassword) {
             return res.status().json({
                 message: "Invalid credentials"
             });
@@ -79,10 +81,10 @@ const loginController = async (req, res) => {
         });
 
         res.status(200).json({
-            message:"Login success",
+            message: "Login success",
             user: {
                 _id: isUser._id,
-                fullName:isUser.fullName,
+                fullName: isUser.fullName,
                 email: isUser.email,
                 profileImage: isUser.profileImage
             }
@@ -94,16 +96,66 @@ const loginController = async (req, res) => {
     }
 }
 const logoutController = async (req, res) => {
-    res.cookie("talkSpace","",{
-        maxAge:0
+    res.cookie("talkSpace", "", {
+        maxAge: 0
     });
     res.status(200).json({
-        message:"Logout success"
+        message: "Logout success"
     });
 }
 
-const updateProfile =  async (req,res) => {
+const updateProfile = async (req, res) => {
+    const { fullName } = req.body || {};
+    const profileImage = req.file;
+    const user = req.user;
+    try {
+        if(!fullName && !profileImage){
+            return res.status(200).json({
+            message: "No changes"
+        })
+        }
+        if (fullName && fullName.trim().length > 25) {
+            throw new Error("Full name should below 25 characters");
+        }
+        if (user.profileImage?.public_id) {
+            await cloud.uploader.destroy(user.profileImage.public_id);
+        };
 
+        let cloudinaryres
+        if (profileImage) {
+            cloudinaryres = await cloud.uploader.upload(
+                profileImage.path, {
+                folder: "TalkSpace",
+                resource_type: "image"
+            }
+            );
+            fs.unlinkSync(profileImage.path);
+        }
+
+        let updatedata={};
+        if(fullName){
+            updatedata.fullName=fullName
+        }
+        if(cloudinaryres){
+            updatedata.profileImage= {
+                url: cloudinaryres.url,
+                public_id: cloudinaryres.public_id
+            }
+        }
+
+        await userModel.findOneAndUpdate({ email: user.email }, updatedata,{
+            new:true            
+        });
+
+        res.status(200).json({
+            message: "Profile updated success"
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({
+            message: error.message
+        })
+    }
 }
 
 module.exports = {

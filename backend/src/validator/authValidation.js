@@ -4,6 +4,9 @@ const signupValidation = (req) => {
     const { fullName, email, password } = req.body;
     if (!fullName || !email || !password) {
         throw new Error("All fields are required")
+    } 
+    if(fullName && fullName.trim().length > 25){
+        throw new Error("Full name should below 25 characters");
     }
     if (!validate.isEmail(email)) {
         throw new Error("Invalid email format");

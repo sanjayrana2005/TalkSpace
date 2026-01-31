@@ -15,8 +15,14 @@ const userSchema = new mongoose.Schema({
         select: false
     },
     profileImage: {
-        type: String,
-        default: "",
+        url:{
+            type: String,
+            default:""
+        },
+        public_id:{
+            type: String,
+            default:""
+        }
     },
 
 }, { timestamps: true });
