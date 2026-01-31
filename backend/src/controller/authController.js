@@ -94,7 +94,12 @@ const loginController = async (req, res) => {
     }
 }
 const logoutController = async (req, res) => {
-
+    res.cookie("talkSpace","",{
+        maxAge:0
+    });
+    res.status(200).json({
+        message:"Logout success"
+    });
 }
 
 module.exports = {
