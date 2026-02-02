@@ -6,7 +6,7 @@ const protectRoute = async (req,res,next) =>{
         const token = req.cookies.talkSpace;
         if(!token) {
             return res.status(401).json({
-                message:"Unauthorizes-No token provided"
+                message:"Unauthorized-No token provided"
             });
         }
 
