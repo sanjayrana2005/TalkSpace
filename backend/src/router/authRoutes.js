@@ -5,7 +5,7 @@ const authRouter = express.Router();
 const upload = require("../utils/multer");
 const arcjectProtection = require("../middleware/arcjet-middleware");
 
-// authRouter.use(arcjectProtection);
+authRouter.use(arcjectProtection);
 
 authRouter.post("/signup",signupController);
 authRouter.post("/login",loginController);

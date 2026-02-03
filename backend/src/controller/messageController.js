@@ -95,8 +95,37 @@ const sendMessage = async (req, res) => {
     }
 }
 
+const getChatPartners = async (req, res) => {
+    try {
+        const loggedInUserId = req.user._id;
+
+        //find all messages the logged in user is either sender or receiver
+        const message = await messageModel.find({
+            $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }]
+        });
+        const chatPartnerId = [
+            ...new Set(
+                message.map(msg => msg.senderId.toString() === loggedInUserId.toString()
+                    ? msg.receiverId.toString()
+                    : msg.loggedInUserId.toString()))];
+
+          const  chatPartners = await userModel.find({
+            _id:{$in:chatPartnerId}
+          });
+
+          res.status(200).json({
+            chatPartners
+          })
+    } catch (error) {
+        res.json({
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     getAllContacts,
     getMessageByUserId,
-    sendMessage
+    sendMessage,
+    getChatPartners
 };
