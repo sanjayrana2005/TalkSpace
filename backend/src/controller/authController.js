@@ -109,10 +109,10 @@ const updateProfile = async (req, res) => {
     const profileImage = req.file;
     const user = req.user;
     try {
-        if(!fullName && !profileImage){
+        if (!fullName && !profileImage) {
             return res.status(200).json({
-            message: "No changes"
-        })
+                message: "No changes"
+            })
         }
         if (fullName && fullName.trim().length > 25) {
             throw new Error("Full name should below 25 characters");
@@ -121,30 +121,30 @@ const updateProfile = async (req, res) => {
             await cloud.uploader.destroy(user.profileImage.public_id);
         };
 
-        let cloudinaryres
+        let cloudinaryres;
         if (profileImage) {
             cloudinaryres = await cloud.uploader.upload(
                 profileImage.path, {
-                folder: "TalkSpace",
+                folder: "TalkSpace/profile",
                 resource_type: "image"
             }
             );
             fs.unlinkSync(profileImage.path);
         }
 
-        let updatedata={};
-        if(fullName){
-            updatedata.fullName=fullName
+        let updatedata = {};
+        if (fullName) {
+            updatedata.fullName = fullName
         }
-        if(cloudinaryres){
-            updatedata.profileImage= {
+        if (cloudinaryres) {
+            updatedata.profileImage = {
                 url: cloudinaryres.url,
                 public_id: cloudinaryres.public_id
             }
         }
 
-        await userModel.findOneAndUpdate({ email: user.email }, updatedata,{
-            new:true            
+        await userModel.findOneAndUpdate({ email: user.email }, updatedata, {
+            new: true
         });
 
         res.status(200).json({
