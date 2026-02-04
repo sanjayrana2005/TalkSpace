@@ -5,7 +5,7 @@ const upload = require("../utils/multer");
 const arcjectProtection = require("../middleware/arcjet-middleware");
 
 const messageRouter = express.Router();
-app.use(arcjectProtection,protectRoute)
+messageRouter.use(arcjectProtection,protectRoute)
 
 messageRouter.get("/contacts",getAllContacts);
 messageRouter.get("/chats",getChatPartners);
