@@ -1,11 +1,20 @@
 import React from 'react'
+import { Route, Routes } from 'react-router'
+import ChatPage from './Pages/ChatPage'
+import LoginPage from './Pages/LoginPage'
+import SignupPage from './Pages/SignupPage'
 
 const App = () => {
   return (
-    <button
-  class="inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900">
-  Button
-</button>
+    <div className='min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden'>
+
+    {/* DECORATORS - GRID BG & GLOW SHAPES */}
+      <Routes>
+      <Route path="/" element={<ChatPage/>}/>
+      <Route path="/login" element={<LoginPage/>}/>
+      <Route path="/signup" element={<SignupPage/>}/>
+    </Routes>
+    </div>
   )
 }
 
